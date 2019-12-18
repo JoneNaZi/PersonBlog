@@ -30,4 +30,4 @@ def detail(request, blog_id):
     entry = models.Entry.objects.get(id=blog_id)
     entry.increase_visiting()
 
-    return render(request, 'html/detail.html')
+    return render(request, 'html/detail.html', {"entry": entry})
