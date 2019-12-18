@@ -42,7 +42,7 @@ class Entry(models.Model):
 
     def get_absolute_url(self):
         # 获取当前博客详情页的url
-        return reverse("my_blog:detail", kwargs={"blog_id": self.id})  # app名字，详情页url的别名，参数是当前博客的id
+        return reverse("my_blog:blog_detail", kwargs={"blog_id": self.id})  # app名字，详情页url的别名，参数是当前博客的id
 
     def increase_visiting(self):
         # 访问量+1

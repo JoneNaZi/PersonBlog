@@ -25,5 +25,4 @@ urlpatterns = [
     path('login/', views.login),
     path('login_action/', views.login_action),
     path('home_page/', views.home_page),
-    # path('detail/', views.detail),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # 添加图片的url
