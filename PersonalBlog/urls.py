@@ -14,12 +14,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from my_blog import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('my_blog/', include('my_blog.urls')),
     path('login/', views.login),
     path('login_action/', views.login_action),
-    path('even_manage/', views.even_manage),
-]
+    path('home_page/', views.home_page),
+    # path('detail/', views.detail),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # 添加图片的url

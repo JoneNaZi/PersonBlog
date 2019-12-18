@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from . import models
 from django.contrib import auth
 
 
@@ -14,11 +15,19 @@ def login_action(request):
         password = request.POST.get("password")
 
         if username == 'dengzhi' and password == 'dengzhi':
-            return HttpResponseRedirect('/even_manage')
+            return HttpResponseRedirect('/home_page')
         else:
             return render(request, 'html/login.html', {'error_msg': error_msg})
 
 
-def even_manage(request):
+def home_page(request):
+    entries = models.Entry.objects.all()
     username = request.session.get("user", "")  # 获取浏览器session
-    return render(request, "html/home_page.html", {"user": username})
+    return render(request, "html/home_page.html", {"user": username, "entries": entries})
+
+
+def detail(request, blog_id):
+    entry = models.Entry.objects.get(id=blog_id)
+    entry.increase_visiting()
+
+    return render(request, 'html/detail.html')
