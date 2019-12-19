@@ -1,16 +1,19 @@
 *{margin: 0;padding: 0;list-style: none;}
+html{
+	min-height: 100%;
+}
 body{
 	background: url('../img/bg.jpg');
-    background-size: 100% 100%;
+    background-size: cover;
 	background-repeat: no-repeat;
 }
 .container{
 	width: 1200px;
-	height: 870px;
+	height: 100%;
 	margin: 0 auto;
 /* 	background: #ccc; */
 }
-/* 导航 */
+ /*导航*/
 .nav{
 	margin-top: 10px;
 	height: 50px;
@@ -32,31 +35,30 @@ body{
 }
 /* 主题内容 */
 .main{
+	position: absolute;
 	width:1200px;
 	height: 450px;
 }
-.sideleft{
-	width:460px;
-	height: 250px;
-	float: left;
-	color: #e0e0e0;
-	padding:85px 130px;
-}
-.sideleft p{
-	padding: 8px 0;
-	font-size: 16px;
-	color: #e0e0e0;
-}
 .sideright{
+	position: relative;
+	top: 50%;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	margin: auto;
 	width: 480px;
 	height: 450px;
-	float: right;
 }
 .sideright .index{
+	position: relative;
 	width: 330px;
 	height: 350px;
+	top: 0;
+	right: 0;
+	: 0;
+	left: 0;
 	background-color:rgba(255,255,255,0.75);
-	margin: 100px 120px;
+	margin: auto;
 }
 .headline{
 	font-size: 22px;
@@ -116,20 +118,3 @@ input[type="submit"]:hover{
 .cstyle a{
 	text-decoration: none;
 }
-.footer{
-	width: 1000px;
-	margin:280px auto;
-}
-.footer ul{
-	margin-left: 100px;
-}
-.footer ul li{
-	float: left;
-}
-.footer ul li a{
-	text-decoration: none;
-	color: #e0e0e0;
-	border-left: 2px solid #e0e0e0;
-	padding:0 10px;
-}
-
