@@ -7,12 +7,6 @@ body{
     background-size: cover;
 	background-repeat: no-repeat;
 }
-.container{
-	width: 1200px;
-	height: 100%;
-	margin: 0 auto;
-/* 	background: #ccc; */
-}
  /*导航*/
 .nav{
 	margin-top: 10px;
@@ -34,29 +28,15 @@ body{
 	color: white;
 }
 /* 主题内容 */
-.main{
-	position: absolute;
-	width:1200px;
-	height: 450px;
-}
 .sideright{
-	position: relative;
-	top: 50%;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	margin: auto;
+	margin: 100px 120px 0 0;
 	width: 480px;
 	height: 450px;
+	float: right;
 }
 .sideright .index{
-	position: relative;
 	width: 330px;
 	height: 350px;
-	top: 0;
-	right: 0;
-	: 0;
-	left: 0;
 	background-color:rgba(255,255,255,0.75);
 	margin: auto;
 }
