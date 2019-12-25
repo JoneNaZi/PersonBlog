@@ -6,7 +6,11 @@
 </head>
 <body>
     {% extends 'html/base.html' %}
+    {% load static %}
     {% block title %}博客详情页{% endblock %}
+    {% block css %}
+        <link rel="stylesheet" href="{% static 'css/github.css' %}">
+    {% endblock %}
     {% block content %}
         <div class="container">
             <div class="row">
@@ -33,7 +37,8 @@
                         {% endif %}
                         <hr />
                         <p>
-                            {{ entry.body }}
+                            {{ entry.toc | safe}}
+                            {{ entry.body | safe}}
                         </p>
                     </p>
                 </div>

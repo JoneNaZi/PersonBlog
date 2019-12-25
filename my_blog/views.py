@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from . import models
+import markdown
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import auth
 
 
@@ -9,7 +11,7 @@ def login(request):
 
 
 def login_action(request):
-    error_msg = "用户名或密码错误"
+    error_msg = ""
     if request.method == 'POST':
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -17,17 +19,147 @@ def login_action(request):
         if username == 'dengzhi' and password == 'dengzhi':
             return HttpResponseRedirect('/home_page')
         else:
-            return render(request, 'html/login.html', {'error_msg': error_msg})
+            error_msg = "用户名或密码错误"
+    return render(request, 'html/login.html', {'error_msg': error_msg})
 
 
 def home_page(request):
     entries = models.Entry.objects.all()
     username = request.session.get("user", "")  # 获取浏览器session
-    return render(request, "html/home_page.html", {"user": username, "entries": entries})
+    page = request.GET.get('page', 1)
+    entry_list, pagination = make_paginator(entries, page)
+    page_data = pagination_data(pagination, page)
+    return render(request, "html/home_page.html", locals())
 
 
 def detail(request, blog_id):
     entry = models.Entry.objects.get(id=blog_id)
+    md = markdown.Markdown(extensions=[
+        'markdown.extensions.extra',
+        'markdown.extensions.codehilite',
+        'markdown.extensions.toc',
+    ])
+    entry.body = md.convert(entry.body)
+    entry.toc = md.toc
     entry.increase_visiting()
 
     return render(request, 'html/detail.html', {"entry": entry})
+
+
+# 分页功能
+def make_paginator(objects, page, num=3):
+    paginator = Paginator(objects, num)
+    try:
+        object_list = paginator.page(page)
+    except PageNotAnInteger:
+        object_list = paginator.page(1)
+    except EmptyPage:
+        object_list = paginator.page(paginator.num_pages)
+    return object_list, paginator
+
+
+def pagination_data(paginator, page):
+    """
+    用于自定义展示分页页码的方法
+    :param paginator: Paginator类的对象
+    :param page: 当前请求的页码
+    :return: 一个包含所有页码和符号的字典
+    """
+    if paginator.num_pages == 1:
+        # 如果无法分页， 也就只有1页不到的内容，则无需显示分页导航条，不用任何分页导航条的数据，因此返回一个空的字典
+        return {}
+    # 当前页左边连续的页码号，初始值为空
+    left = []
+
+    # 当前页右边连续的页码号，初始值为空
+    right = []
+
+    # 标示第 1 页页码后是否需要显示省略号
+    left_has_more = False
+
+    # 标示最后一夜页码前是否需要显示省略号
+    right_has_more = False
+
+    # 标示是否需要显示第 1 页的页码号
+    # 因为如果当前页左边的连续页码号中已经含有第 1 页的页码号，此时就无需再显示第 1 页的页码号
+    # 其它情况下第 1 页的页码是始终需要显示的
+    # 初始值设为False
+    first = False
+
+    # 标示是否需要显示最后一页的页码号
+    # 需要此指示变量的理由和上面相同
+    last = False
+
+    # 获取用户当前请求的页码号
+    try:
+        page_number = int(page)
+    except ValueError:
+        page_number = 1
+    # except:
+    #     page_number = 1
+
+    # 获得分页后的总页数
+    total_pages = paginator.num_pages
+
+    # 获取整个分页页码列表， 比如分了四页， 那么就是{1, 2, 3, 4}
+    page_range = paginator.page_range
+
+    if page_number == 1:
+        # 如果用户请求的是第 1 页的数据，那么当前页左边不需要数据，因此left=[](已默认为空)
+        # 此时只要获取当前页右边的连续页码号
+        # 比如分页页码列表是[1, 2, 3, 4]，那么获取的就是right = [2, 3]
+        # 注意这里只获取了当前页码后连续 2 个页码，你可以更改这个数字获取更多页码
+        right = page_range[page_number:page_number + 2]
+
+        # 如果右边的页码号比最后一页的页码号减去 1 还要小
+        # 说明最右边的页码号和最后爷爷的页码号之间还有其它页码，因此需要显示省略号，通过right_has_more来指示
+        if right[-1] < total_pages - 1:
+            right_has_more = True
+
+        # 如果最右边的页码号比最后一页的页码号小，说明当前页右边的连续页码号中不包含最后一页的页码
+        # 所以需要显示最后一页的页码号，通过last来指示
+        if right[-1] < total_pages:
+            last = True
+    elif page_number == total_pages:
+        # 如果当前用户请求的是最后一页数据，那么当前页右边就不要要数据，因此right=[](已默认为空)
+        # 此时只要获取当前页左边的连续页码号
+        # 比如分页页码列表是[1, 2, 3, 4]，那么获取的就是left = [2, 3]
+        # 这里只获取了当前页码后连续两个页码，你可以更改这个数字以获取更多页码
+        left = page_range[(page_number - 3) if (page_number - 3) > 0 else 0:page_number - 1]
+
+        # 如果最左边的页码号比第 2 页页码号还大
+        # 说明最左边的页码号和第 1 页的页码号之间还有其它页码，因此需要显示省略号，通过left_has_more来指示
+        if left[0] > 2:
+            left_has_more = True
+
+        # 如果最左边的页码号比第 1 页的页码号大，说明当前页左边的连续页码号中不包含第 1 页的页码
+        # 所以需要显示第 1 页的页码号，通过first来指示
+        if left[0] > 1:
+            first = True
+    else:
+        # 用户请求的既不是第 1 页，也不是最后一页，则需要获取当前页左右两边的连续页码号
+        # 这里只获取了当前页码前后连续两个页码，你可以更改这个数字以获取更多页码
+        left = page_range[(page_number - 3) if (page_number - 3) > 0 else 0:page_number - 1]
+        right = page_range[page_number:page_number + 2]
+
+        # 是否需要显示最后一页和最后一页前的省略号
+        if right[-1] < total_pages - 1:
+            right_has_more = True
+        if right[-1] < total_pages:
+            last = True
+
+        # 是否需要显示第 1 页和第 1 页后的省略号
+        if left[0] > 2:
+            left_has_more = True
+        if left[0] > 1:
+            first = True
+
+    data = {
+        'left': left,
+        'right': right,
+        'left_has_more': left_has_more,
+        'right_has_more': right_has_more,
+        'first': first,
+        'last': last,
+    }
+    return data
