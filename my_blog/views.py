@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from . import models
 import markdown
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 from django.contrib import auth
 
 
@@ -29,7 +30,8 @@ def home_page(request):
     page = request.GET.get('page', 1)
     entry_list, pagination = make_paginator(entries, page)
     page_data = pagination_data(pagination, page)
-    return render(request, "html/home_page.html", locals())
+    return render(request, "html/home_page.html", {"entries": entry_list, "username": username, "page_data": page_data,
+                  "entry_list": entry_list})
 
 
 def detail(request, blog_id):
@@ -163,3 +165,35 @@ def pagination_data(paginator, page):
         'last': last,
     }
     return data
+
+
+def search(request):
+    """
+    搜索
+    :param request:
+    :return:
+    """
+    keyword = request.GET.get('keyword', None)
+    if not keyword:
+        error_msg = "请输入关键字"
+        return render(request, 'html/home_page.html', {"error_msg": error_msg})
+    entries = models.Entry.objects.filter(Q(title__icontains=keyword)
+                                          | Q(body__icontains=keyword)
+                                          | Q(abstract__icontains=keyword))
+    page = request.GET.get('page', 1)
+    entry_list, paginator = make_paginator(entries, page)
+    page_data = pagination_data(paginator, page)
+    return render(request, 'html/home_page.html', {"entries": entry_list, "page_data": page_data,
+                                                   "entry_list": entry_list})
+
+
+# 分类
+def category(request, category_id):
+    c = models.Category.objects.get(id=category_id)
+    entries = models.Entry.objects.filter(category=c)
+    page = request.GET.get('page', 1)
+    entry_list, paginator = make_paginator(entries, page)
+    page_data = pagination_data(paginator, page)
+    return render(request, 'html/home_page.html', {"entries": entry_list, "page_data": page_data,
+                                                   "entry_list": entry_list})
+
