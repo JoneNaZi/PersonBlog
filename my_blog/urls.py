@@ -7,6 +7,7 @@ urlpatterns = [
     re_path(r'^(?P<blog_id>[0-9]+)/$', views.detail, name="blog_detail"),
     re_path(r'^search/$', views.search, name="blog_search"),
     re_path(r'^category/(?P<category_id>[0-9]+)/$', views.category, name="blog_category"),
+    re_path(r'^tag/(?P<tag_id>[0-9]+)/$', views.tag, name="blog_tag"),
 ]
 
 app_name = 'my_blog'

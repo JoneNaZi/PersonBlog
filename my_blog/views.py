@@ -197,3 +197,17 @@ def category(request, category_id):
     return render(request, 'html/home_page.html', {"entries": entry_list, "page_data": page_data,
                                                    "entry_list": entry_list})
 
+
+# 标签
+def tag(request, tag_id):
+    t = models.Tag.objects.get(id=tag_id)
+    if t.name == "全部":
+        entries = models.Entry.objects.all()
+    else:
+        entries = models.Entry.objects.filter(tags=t)
+    page = request.GET.get('page', 1)
+    entry_list, paginator = make_paginator(entries, page)
+    page_data = pagination_data(paginator, page)
+    return render(request, 'html/home_page.html', {"entries": entry_list, "page_data": page_data,
+                                                   "entry_list": entry_list})
+
