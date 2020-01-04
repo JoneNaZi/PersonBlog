@@ -14,8 +14,8 @@ def login(request):
 def login_action(request):
     error_msg = ""
     if request.method == 'POST':
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        username = request.POST.get("username", None)
+        password = request.POST.get("password", None)
 
         if username == 'dengzhi' and password == 'dengzhi':
             return HttpResponseRedirect('/home_page')
@@ -205,6 +205,16 @@ def tag(request, tag_id):
         entries = models.Entry.objects.all()
     else:
         entries = models.Entry.objects.filter(tags=t)
+    page = request.GET.get('page', 1)
+    entry_list, paginator = make_paginator(entries, page)
+    page_data = pagination_data(paginator, page)
+    return render(request, 'html/home_page.html', {"entries": entry_list, "page_data": page_data,
+                                                   "entry_list": entry_list})
+
+
+# 博客归档
+def archives(request, year, month):
+    entries = models.Entry.objects.filter(created_time__year=year, created_time__month=month)
     page = request.GET.get('page', 1)
     entry_list, paginator = make_paginator(entries, page)
     page_data = pagination_data(paginator, page)
